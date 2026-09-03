@@ -89,4 +89,3 @@ match command:
     case "list-in-progress":
         print("Listing in-progress tasks")
 
-# print(sys.argv)
