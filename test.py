@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 from pathlib import Path
@@ -5,6 +6,15 @@ from datetime import datetime
 
 command = sys.argv[1]
 file = Path("tasks.json")
+
+def load_tasks():
+    if not os.path.exists("tasks.json"):
+        return []
+
+    with open("tasks.json", "r") as file:
+        tasks = json.load(file)
+
+    return tasks
 
 match command:
     case "add":
@@ -50,7 +60,28 @@ match command:
     case "mark-done":
         print("")
     case "list":
-        print("Listing all tasks")
+        tasks = load_tasks()
+
+        if not tasks:
+            print("No tasks found")
+        else:
+            headers = list(tasks[0].keys())
+
+            col_widths = {}
+
+            for key in headers:
+                col_widths[key] = max(
+                len(key),
+                max(len(str(task[key])) for task in tasks)
+                )
+
+            format_str = "|".join([f"{{:<{col_widths[key]}}}" for key in headers])
+
+            print(format_str.format(*headers))
+            print("-+-".join(["-" * col_widths[key] for key in headers]))
+
+            for row in tasks:
+                print(format_str.format(*[str(row[key]) for key in headers]))
     case "list-done":
         print("Listing done tasks")
     case "list-to-do":
