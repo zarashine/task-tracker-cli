@@ -54,7 +54,30 @@ match command:
     case "update":
         print("")
     case "delete":
-        print("")
+        if len(sys.argv) < 3:
+            print("Task ID is required")
+        else:
+            try:
+                id_num = int(sys.argv[2])
+            except ValueError:
+                print("Task ID must be a number")
+            else:
+                tasks = load_tasks()
+                found = False
+                if not tasks:
+                    print("No tasks found")
+                else:
+                    for i, task in enumerate(tasks):
+                        if task["id"] == id_num:
+                            tasks.pop(i)
+                            found = True
+                            with open("tasks.json", "w") as file:
+                                json.dump(tasks, file)
+                            break
+
+                    if not found:
+                        print("There is no task with this ID")
+
     case "mark-in-progress":
         print("")
     case "mark-done":
