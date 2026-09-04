@@ -52,7 +52,32 @@ match command:
             json.dump(tasks, file)
         
     case "update":
-        print("")
+        if len(sys.argv) < 4:
+            print("Task ID and description are required.")
+        else:
+            try:
+                id_num = int(sys.argv[2])
+            except ValueError:
+                print("Task ID must be number!")
+            else:
+                tasks = load_tasks()
+                time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                found = False
+                if not tasks:
+                    print("No tasks found!")
+                else:
+                    for i, task in enumerate(tasks):
+                        if task["id"] == id_num:
+                            task["description"] = sys.argv[3]
+                            task["updateیAt"] = time
+                            found = True
+                            with open("tasks.json", "w") as file:
+                                json.dump(tasks, file)
+                                break
+
+                    if not found:
+                        print("There is no task with this ID.")
+
     case "delete":
         if len(sys.argv) < 3:
             print("Task ID is required")
@@ -60,12 +85,12 @@ match command:
             try:
                 id_num = int(sys.argv[2])
             except ValueError:
-                print("Task ID must be a number")
+                print("Task ID must be a number!")
             else:
                 tasks = load_tasks()
                 found = False
                 if not tasks:
-                    print("No tasks found")
+                    print("No tasks found!")
                 else:
                     for i, task in enumerate(tasks):
                         if task["id"] == id_num:
@@ -76,7 +101,7 @@ match command:
                             break
 
                     if not found:
-                        print("There is no task with this ID")
+                        print("There is no task with this ID.")
 
     case "mark-in-progress":
         print("")
