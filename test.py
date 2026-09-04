@@ -105,7 +105,7 @@ match command:
 
     case "mark-in-progress":
         if len(sys.argv) < 3:
-            print("Task ID and new status are required.")
+            print("Task ID is required.")
         else:
             try:
                 id_num = int(sys.argv[2])
@@ -131,7 +131,31 @@ match command:
                         print("There is no task with this ID.")
 
     case "mark-done":
-        print("")
+        if len(sys.argv) < 3:
+            print("Task ID is required.")
+        else:
+            try:
+                id_num = int(sys.argv[2])
+            except ValueError:
+                print("Task ID must be number!")
+            else:
+                tasks = load_tasks()
+                time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                found = False
+                if not tasks:
+                    print("No tasks found!")
+                else:
+                    for i, task in enumerate(tasks):
+                        if task["id"] == id_num:
+                            task["status"] = "done"
+                            task["updatedAt"] = time
+                            found = True
+                            with open("tasks.json", "w") as file:
+                                json.dump(tasks, file)
+                            break
+
+                    if not found:
+                        print("There is no task with this ID.")
     case "list":
         tasks = load_tasks()
 
