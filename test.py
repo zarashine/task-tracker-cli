@@ -23,6 +23,12 @@ commands = {
 
 args = sys.argv[2:]
 
+def parse_id(value):
+    try:
+        return int(value)
+    except ValueError:
+        return None
+
 def load_tasks():
     if not os.path.exists("tasks.json"):
         return []
@@ -112,52 +118,52 @@ match command:
     case "add":
         tasks = load_tasks()
         
-        newID = 0
+        new_id = 0
         found = False
         for i in range(len(tasks)):
             if i+1 != tasks[i]["id"]:
-                newID = i+1
+                new_id = i+1
                 found = True
                 break
         if not found:
-            newID = len(tasks) + 1
+            new_id = len(tasks) + 1
 
-        time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        newTask = {
-                    "id": newID,
-                    "description": sys.argv[2],
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        new_task = {
+                    "id": new_id,
+                    "description": args[0],
                     "status": "to-do",
-                    "createdAt": time,
+                    "createdAt": current_time,
                     "updatedAt": "-"
                 }
 
-        tasks.insert(newID-1, newTask)
+        tasks.insert(new_id-1, new_task)
 
         save_tasks(tasks)
         
     case "update":
-        try:
-            id_num = int(sys.argv[2])
-        except ValueError:
-            print("Task ID must be number!")
+        id_num = parse_id(args[0])
+
+        if id_num is None:
+            print("Task ID must be a number!")
         else:
             tasks = load_tasks()
-            time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             task = find_task(tasks, id_num)
 
             if task:
-                task["description"] = sys.argv[3]
-                task["updatedAt"] = time
+                task["description"] = args[1]
+                task["updatedAt"] = current_time
                 save_tasks(tasks)
             else:
                 print("There is no task with this ID.")
                     
 
     case "delete":
-        try:
-            id_num = int(sys.argv[2])
-        except ValueError:
+        id_num = parse_id(args[0])
+
+        if id_num is None:
             print("Task ID must be a number!")
         else:
             tasks = load_tasks()
@@ -171,37 +177,37 @@ match command:
                 print("There is no task with this ID.")
 
     case "mark-in-progress":
-        try:
-            id_num = int(sys.argv[2])
-        except ValueError:
-            print("Task ID must be number!")
+        id_num = parse_id(args[0])
+
+        if id_num is None:
+            print("Task ID must be a number!")
         else:
             tasks = load_tasks()
-            time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             task = find_task(tasks, id_num)
 
             if task:
                 task["status"] = "in-progress"
-                task["updatedAt"] = time
+                task["updatedAt"] = current_time
                 save_tasks(tasks)
             else:
                 print("There is no task with this ID.")
 
     case "mark-done":
-        try:
-            id_num = int(sys.argv[2])
-        except ValueError:
-            print("Task ID must be number!")
+        id_num = parse_id(args[0])
+
+        if id_num is None:
+            print("Task ID must be a number!")
         else:
             tasks = load_tasks()
-            time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             task = find_task(tasks, id_num)
             
             if task:
                 task["status"] = "done"
-                task["updatedAt"] = time
+                task["updatedAt"] = current_time
                 save_tasks(tasks)
             else:
                 print("There is no task with this ID.")
