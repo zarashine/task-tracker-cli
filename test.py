@@ -4,7 +4,11 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-command = sys.argv[1]
+if len(sys.argv) < 2:
+    command = "help"
+else:
+    command = sys.argv[1]
+
 file = Path("tasks.json")
 
 def load_tasks():
@@ -37,6 +41,25 @@ def print_tasks(tasks):
 
         for row in tasks:
             print(format_str.format(*[str(row[key]) for key in headers]))
+
+def show_help():
+    print("""
+Task Tracker CLI
+
+Usage:
+    python test.py <command> [arguments]
+
+Commands:
+    add <descripttoin>              Add a new task
+    update <id> <description>       Update a task
+    delete <id>                     Delete a task
+    mark-in-progress <id>           Mark a task as in progress
+    mark-done <id>                  Mark a task as done
+    list                            List all tasks
+    list-done                       List completed tasks
+    list-to-do                      List pending tasks
+    list-in-progress                List tasks in progress
+    """)
 
 match command:
     case "add":
@@ -210,3 +233,8 @@ match command:
 
         print_tasks(in_progress_tasks)
 
+    case "help":
+        show_help()
+
+    case _:
+        print(f"Unknwon command: {command}\n Run 'python test.py help' to see available commands")
