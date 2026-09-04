@@ -16,6 +16,28 @@ def load_tasks():
 
     return tasks
 
+def print_tasks(tasks):
+    if not tasks:
+        print("No tasks found")
+    else:
+        headers = list(tasks[0].keys())
+
+        col_widths = {}
+
+        for key in headers:
+            col_widths[key] = max(
+            len(key),
+            max(len(str(task[key])) for task in tasks)
+            )
+
+        format_str = "|".join([f"{{:<{col_widths[key]}}}" for key in headers])
+
+        print(format_str.format(*headers))
+        print("-+-".join(["-" * col_widths[key] for key in headers]))
+
+        for row in tasks:
+            print(format_str.format(*[str(row[key]) for key in headers]))
+
 match command:
     case "add":
         if not file.exists():
@@ -158,31 +180,33 @@ match command:
                         print("There is no task with this ID.")
     case "list":
         tasks = load_tasks()
+        print_tasks(tasks)
 
-        if not tasks:
-            print("No tasks found")
-        else:
-            headers = list(tasks[0].keys())
-
-            col_widths = {}
-
-            for key in headers:
-                col_widths[key] = max(
-                len(key),
-                max(len(str(task[key])) for task in tasks)
-                )
-
-            format_str = "|".join([f"{{:<{col_widths[key]}}}" for key in headers])
-
-            print(format_str.format(*headers))
-            print("-+-".join(["-" * col_widths[key] for key in headers]))
-
-            for row in tasks:
-                print(format_str.format(*[str(row[key]) for key in headers]))
     case "list-done":
-        print("Listing done tasks")
+        tasks = load_tasks()
+        done_tasks = []
+
+        for task in tasks:
+            if task["status"] == "done":
+                done_tasks.append(task)
+
+        print_tasks(done_tasks)
     case "list-to-do":
-        print("Listing to do tasks")
+        tasks = load_tasks()
+        to_do_tasks = []
+
+        for task in tasks:
+            if task["status"] == "to-do":
+                to_do_tasks.append(task)
+
+        print_tasks(to_do_tasks)
     case "list-in-progress":
-        print("Listing in-progress tasks")
+        tasks = load_tasks()
+        in_progress_tasks = []
+
+        for task in tasks:
+            if task["status"] == "in-progress":
+                in_progress_tasks.append(task)
+
+        print_tasks(in_progress_tasks)
 
