@@ -3,11 +3,6 @@ import sys
 import json
 from datetime import datetime
 
-if len(sys.argv) < 2:
-    command = "help"
-else:
-    command = sys.argv[1]
-
 commands = {
     "add": 1,
     "update": 2,
@@ -20,8 +15,6 @@ commands = {
     "list-in-progress": 0,
     "help": 0
 }
-
-args = sys.argv[2:]
 
 def parse_id(value):
     try:
@@ -92,7 +85,7 @@ def show_help():
 Task Tracker CLI
 
 Usage:
-    python test.py <command> [arguments]
+    tasl-cli <command> [arguments]
 
 Commands:
     add <description>              Add a new task
@@ -106,130 +99,141 @@ Commands:
     list-in-progress                List tasks in progress
     """)
 
-if command not in commands:
-    print(f"Unknown command: {command}\n Run 'python test.py help' to see available commands")
-    sys.exit()
+def main():
+    if len(sys.argv) < 2:
+        command = "help"
+    else:
+        command = sys.argv[1]
 
-if len(args) != commands[command]:
-    print(f"Invalid arguments for command: {command}\nRun 'python test.py help' to see the correct syntax")
-    sys.exit()
+    args = sys.argv[2:]
 
-match command:
-    case "add":
-        tasks = load_tasks()
-        
-        new_id = 0
-        found = False
-        for i in range(len(tasks)):
-            if i+1 != tasks[i]["id"]:
-                new_id = i+1
-                found = True
-                break
-        if not found:
-            new_id = len(tasks) + 1
+    if command not in commands:
+        print(f"Unknown command: {command}\n Run 'task-cli help' to see available commands")
+        sys.exit()
 
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        new_task = {
-                    "id": new_id,
-                    "description": args[0],
-                    "status": "to-do",
-                    "createdAt": current_time,
-                    "updatedAt": "-"
-                }
+    if len(args) != commands[command]:
+        print(f"Invalid arguments for command: {command}\nRun 'task-cli help' to see the correct syntax")
+        sys.exit()
 
-        tasks.insert(new_id-1, new_task)
-
-        save_tasks(tasks)
-        
-    case "update":
-        id_num = parse_id(args[0])
-
-        if id_num is None:
-            print("Task ID must be a number!")
-        else:
+    match command:
+        case "add":
             tasks = load_tasks()
-            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            task = find_task(tasks, id_num)
-
-            if task:
-                task["description"] = args[1]
-                task["updatedAt"] = current_time
-                save_tasks(tasks)
-            else:
-                print("There is no task with this ID.")
-                    
-
-    case "delete":
-        id_num = parse_id(args[0])
-
-        if id_num is None:
-            print("Task ID must be a number!")
-        else:
-            tasks = load_tasks()
-
-            i = find_task_index(tasks, id_num)
-
-            if i is not None:
-                tasks.pop(i)
-                save_tasks(tasks)
-            else:
-                print("There is no task with this ID.")
-
-    case "mark-in-progress":
-        id_num = parse_id(args[0])
-
-        if id_num is None:
-            print("Task ID must be a number!")
-        else:
-            tasks = load_tasks()
-            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            task = find_task(tasks, id_num)
-
-            if task:
-                task["status"] = "in-progress"
-                task["updatedAt"] = current_time
-                save_tasks(tasks)
-            else:
-                print("There is no task with this ID.")
-
-    case "mark-done":
-        id_num = parse_id(args[0])
-
-        if id_num is None:
-            print("Task ID must be a number!")
-        else:
-            tasks = load_tasks()
-            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            task = find_task(tasks, id_num)
             
-            if task:
-                task["status"] = "done"
-                task["updatedAt"] = current_time
-                save_tasks(tasks)
+            new_id = 0
+            found = False
+            for i in range(len(tasks)):
+                if i+1 != tasks[i]["id"]:
+                    new_id = i+1
+                    found = True
+                    break
+            if not found:
+                new_id = len(tasks) + 1
+
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            new_task = {
+                        "id": new_id,
+                        "description": args[0],
+                        "status": "to-do",
+                        "createdAt": current_time,
+                        "updatedAt": "-"
+                    }
+
+            tasks.insert(new_id-1, new_task)
+
+            save_tasks(tasks)
+            
+        case "update":
+            id_num = parse_id(args[0])
+
+            if id_num is None:
+                print("Task ID must be a number!")
             else:
-                print("There is no task with this ID.")
-    
-    case "list":
-        tasks = load_tasks()
-        print_tasks(tasks)
+                tasks = load_tasks()
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    case "list-done":
-        tasks = load_tasks()
-        done_tasks = filter_tasks(tasks, "done")
-        print_tasks(done_tasks)
+                task = find_task(tasks, id_num)
 
-    case "list-to-do":
-        tasks = load_tasks()
-        to_do_tasks = filter_tasks(tasks, "to-do")
-        print_tasks(to_do_tasks)
+                if task:
+                    task["description"] = args[1]
+                    task["updatedAt"] = current_time
+                    save_tasks(tasks)
+                else:
+                    print("There is no task with this ID.")
+                        
 
-    case "list-in-progress":
-        tasks = load_tasks()
-        in_progress_tasks = filter_tasks(tasks, "in-progress")
-        print_tasks(in_progress_tasks)
+        case "delete":
+            id_num = parse_id(args[0])
 
-    case "help":
-        show_help()
+            if id_num is None:
+                print("Task ID must be a number!")
+            else:
+                tasks = load_tasks()
+
+                i = find_task_index(tasks, id_num)
+
+                if i is not None:
+                    tasks.pop(i)
+                    save_tasks(tasks)
+                else:
+                    print("There is no task with this ID.")
+
+        case "mark-in-progress":
+            id_num = parse_id(args[0])
+
+            if id_num is None:
+                print("Task ID must be a number!")
+            else:
+                tasks = load_tasks()
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                task = find_task(tasks, id_num)
+
+                if task:
+                    task["status"] = "in-progress"
+                    task["updatedAt"] = current_time
+                    save_tasks(tasks)
+                else:
+                    print("There is no task with this ID.")
+
+        case "mark-done":
+            id_num = parse_id(args[0])
+
+            if id_num is None:
+                print("Task ID must be a number!")
+            else:
+                tasks = load_tasks()
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                task = find_task(tasks, id_num)
+                
+                if task:
+                    task["status"] = "done"
+                    task["updatedAt"] = current_time
+                    save_tasks(tasks)
+                else:
+                    print("There is no task with this ID.")
+        
+        case "list":
+            tasks = load_tasks()
+            print_tasks(tasks)
+
+        case "list-done":
+            tasks = load_tasks()
+            done_tasks = filter_tasks(tasks, "done")
+            print_tasks(done_tasks)
+
+        case "list-to-do":
+            tasks = load_tasks()
+            to_do_tasks = filter_tasks(tasks, "to-do")
+            print_tasks(to_do_tasks)
+
+        case "list-in-progress":
+            tasks = load_tasks()
+            in_progress_tasks = filter_tasks(tasks, "in-progress")
+            print_tasks(in_progress_tasks)
+
+        case "help":
+            show_help()
+
+if __name__ == "__main__":
+    main()
